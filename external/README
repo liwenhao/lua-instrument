@@ -1,0 +1,18 @@
+Arrange external dependency in following structure:
+
+lua
+  include
+    lauxlib.h
+    lua.h
+    luaconf.h
+  lib
+    lua52.lib
+visa
+  include
+    visa.h
+    visaext.h
+    visatype.h
+    vpptype.h
+  lib
+    visa32.lib
+
