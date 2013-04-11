@@ -3,27 +3,27 @@ lua-instrument
 
 lua-instrument is a lua module for instrument operating through VISA interface.
 
-### To build:
+## To build:
 
-Tool:
+#### Tool:
 
     vc2008 or higher
 
-Dependencies:
+#### Dependencies:
 
     * lua library
     * visa library
 
-    Put lua and visa library into external directory in a structure
-    described in [external README](external/README).
+Put lua and visa library into external directory in a structure
+described in [external README](external/README).
 
-Build:
+#### Build:
 
-    Run build/vc2008/build.bat or open build/vc2008/lvisa.sln
+Run `build/vc2008/build.bat` or open `build/vc2008/lvisa.sln`
 
-Run:
+## To Run:
 
-Make sure lvisa.dll and instrument.lua in lua's package search path.
+Make sure `lvisa.dll` and `instrument.lua` in lua's package search path.
 Try same simple code:
 
 ```lua
@@ -39,6 +39,6 @@ if s ~= 0 then
 end
 ```
 
-TODO:
+## TODO:
 
     Add API document.
