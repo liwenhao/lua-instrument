@@ -82,7 +82,7 @@ static int vclose(lua_State *L)
 static int vread(lua_State *L)
 {
     ViSession instr = *tovsession(L);
-    size_t nr;
+    ViUInt32 nr;
     luaL_Buffer b;
     luaL_buffinit(L, &b);
     for (;;) {
@@ -106,7 +106,8 @@ static int vread(lua_State *L)
 static int vwrite(lua_State *L)
 {
     ViSession instr = *tovsession(L);
-    size_t size, ret;
+    size_t size;
+    ViUInt32 ret;
     ViStatus err;
     const char* data = luaL_checklstring(L, 2, &size);
 
