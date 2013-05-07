@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Lua-instrument : Lua module for instrument operating through VISA interface" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Lua-instrument</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/liwenhao/lua-instrument">View on GitHub</a>
+
+          <h1 id="project_title">Lua-instrument</h1>
+          <h2 id="project_tagline">Lua module for instrument operating through VISA interface</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/liwenhao/lua-instrument/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/liwenhao/lua-instrument/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>lua-instrument</h1>
+
+<p>lua-instrument is a lua module for instrument operating through VISA interface.</p>
+
+<h2>To build:</h2>
+
+<h4>Tool:</h4>
+
+<pre><code>vc2008 or higher
+</code></pre>
+
+<h4>Dependencies:</h4>
+
+<pre><code>* lua library
+* visa library
+</code></pre>
+
+<p>Put lua and visa library into external directory in a structure
+described in <a href="external/README">external README</a>.</p>
+
+<h4>Build:</h4>
+
+<p>Run <code>build/vc2008/build.bat</code> or open <code>build/vc2008/lvisa.sln</code></p>
+
+<h2>To Run:</h2>
+
+<p>Make sure <code>lvisa.dll</code> and <code>instrument.lua</code> in lua's package search path.
+Try same simple code:</p>
+
+<div class="highlight"><pre><span class="nb">require</span><span class="p">(</span><span class="s2">"</span><span class="s">instrument"</span><span class="p">)</span>
+
+<span class="kd">local</span> <span class="n">i</span> <span class="o">=</span> <span class="n">instrument</span><span class="p">(</span><span class="s2">"</span><span class="s">?*::5::INSTR"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">:</span><span class="n">q</span><span class="p">(</span><span class="s2">"</span><span class="s">*IDN?"</span><span class="p">))</span>
+
+<span class="kd">local</span> <span class="n">s</span><span class="p">,</span><span class="n">m</span> <span class="o">=</span> <span class="n">i</span><span class="p">:</span><span class="n">q</span><span class="p">(</span><span class="s2">"</span><span class="s">SYST:ERR?"</span><span class="p">,</span> <span class="s2">"</span><span class="s">*l"</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">s</span> <span class="o">~=</span> <span class="mi">0</span> <span class="k">then</span>
+  <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="s">bad status: "</span><span class="o">..</span><span class="n">m</span><span class="p">)</span>
+<span class="k">end</span>
+</pre></div>
+
+<h2>TODO:</h2>
+
+<pre><code>Add API document.
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Lua-instrument maintained by <a href="https://github.com/liwenhao">liwenhao</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-40720017-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
