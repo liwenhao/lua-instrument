@@ -39,6 +39,9 @@ if s ~= 0 then
 end
 ```
 
+## Downloads
+[Demo for win32](http://liwenhao.github.io/lua-instrument/downloads/demo.zip)
+
 ## TODO:
 
     Add API document.
