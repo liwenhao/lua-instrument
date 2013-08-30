@@ -1,7 +1,7 @@
 lua-instrument
 ==============
 
-lua-instrument is a lua module for instrument operating through VISA interface.
+lua-instrument is a lua module for instrument controlling through VISA interface.
 
 ## To build:
 
