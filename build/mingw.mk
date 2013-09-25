@@ -1,7 +1,7 @@
 
 CC = gcc
 CFLAGS = -O2 -DLUA_BUILD_AS_DLL -DLUA_LIB -Iexternal/lua/include -Iexternal/visa/include
-LDFLAGS = -Lexternal/lua/lib -Lexternal/visa/lib -llua52 -lvisa32
+LDFLAGS = -Lexternal/lua/lib -llua52
 
 lvisa.dll: lvisa.o
 	@echo "LN" $@

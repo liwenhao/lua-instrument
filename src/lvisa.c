@@ -5,7 +5,7 @@
 #include <lua.h>
 #include <lauxlib.h>
 #include <visa.h>
-
+#include <windows.h>
 #include <string.h>
 
 /*
@@ -13,6 +13,69 @@
  */
 #define VSESSION "VSESSION"
 #define tovsession(L) ((ViSession*)luaL_checkudata(L, 1, VSESSION))
+
+#define VISA_DLL_NAME "visa32.dll"
+
+typedef ViStatus (_VI_FUNC *viOpenDefaultRM_t)(ViPSession vi);
+typedef ViStatus (_VI_FUNC *viFindRsrc_t)(ViSession sesn, ViString expr, ViPFindList vi, ViPUInt32 retCnt, ViChar _VI_FAR desc[]);
+typedef ViStatus (_VI_FUNC *viFindNext_t)(ViFindList vi, ViChar _VI_FAR desc[]);
+typedef ViStatus (_VI_FUNC *viOpen_t)(ViSession sesn, ViRsrc name, ViAccessMode mode, ViUInt32 timeout, ViPSession vi);
+typedef ViStatus (_VI_FUNC *viClose_t)(ViObject vi);
+typedef ViStatus (_VI_FUNC *viSetAttribute_t)(ViObject vi, ViAttr attrName, ViAttrState attrValue);
+typedef ViStatus (_VI_FUNC *viGetAttribute_t)(ViObject vi, ViAttr attrName, void _VI_PTR attrValue);
+typedef ViStatus (_VI_FUNC *viStatusDesc_t)(ViObject vi, ViStatus status, ViChar _VI_FAR desc[]);
+typedef ViStatus (_VI_FUNC *viRead_t)(ViSession vi, ViPBuf buf, ViUInt32 cnt, ViPUInt32 retCnt);
+typedef ViStatus (_VI_FUNC *viWrite_t)(ViSession vi, ViBuf  buf, ViUInt32 cnt, ViPUInt32 retCnt);
+
+#define VIFUN(x) x##_t p##x
+VIFUN(viOpenDefaultRM);
+VIFUN(viFindRsrc);
+VIFUN(viFindNext);
+VIFUN(viOpen);
+VIFUN(viClose);
+VIFUN(viSetAttribute);
+VIFUN(viGetAttribute);
+VIFUN(viStatusDesc);
+VIFUN(viRead);
+VIFUN(viWrite);
+
+#define VILOAD(x) do {						  \
+    p##x = (x##_t)GetProcAddress(g_visa, #x); \
+		if (p##x == NULL) {					  \
+			FreeLibrary(g_visa);			  \
+			g_visa = NULL;					  \
+			lua_pushstring(L, #x"not found"); \
+			lua_error(L);					  \
+		}									  \
+	}while (0)
+
+HANDLE g_visa = NULL;
+static int load_visa(lua_State *L)
+{
+	if (g_visa!=NULL)
+		return 0;
+
+    g_visa = LoadLibrary(TEXT(VISA_DLL_NAME));
+
+    if (g_visa == NULL) {
+		lua_pushfstring(L, "load visa lib failed: %s:%d", VISA_DLL_NAME, GetLastError());
+		lua_error(L);
+        return 0;
+	}
+
+    VILOAD(viOpenDefaultRM);
+    VILOAD(viFindRsrc);
+    VILOAD(viFindNext);
+    VILOAD(viOpen);
+    VILOAD(viClose);
+    VILOAD(viSetAttribute);
+	VILOAD(viGetAttribute);
+    VILOAD(viStatusDesc);
+    VILOAD(viRead);
+    VILOAD(viWrite);
+
+    return 0;
+}
 
 /**
  * session(address [, timeout])
@@ -33,35 +96,35 @@ static int open_vsession(lua_State *L)
     luaL_getmetatable(L, VSESSION);
     lua_setmetatable(L, -2);
 
-    err = viOpenDefaultRM(&dfm);
+    err = pviOpenDefaultRM(&dfm);
     if (err) {
-        viStatusDesc(dfm, err, desc);
+        pviStatusDesc(dfm, err, desc);
         lua_pushstring(L, desc);
         lua_error(L);
     }
 
-    err = viFindRsrc(dfm, addr, &find, &count, name);
+    err = pviFindRsrc(dfm, addr, &find, &count, name);
     if (err < VI_SUCCESS) {
-        viStatusDesc(dfm, err, desc);
-        viClose(dfm);
+        pviStatusDesc(dfm, err, desc);
+        pviClose(dfm);
         lua_pushstring(L, desc);
         lua_error(L);
     }
-    viClose(find);
+    pviClose(find);
 
-    err = viOpen(dfm, name, VI_NULL, timeout, instr);
+    err = pviOpen(dfm, name, VI_NULL, timeout, instr);
     if (err) {
-        viStatusDesc(dfm, err, desc);
-        viClose(dfm);
+        pviStatusDesc(dfm, err, desc);
+        pviClose(dfm);
         lua_pushstring(L, desc);
         lua_error(L);
     }
 
-    err = viSetAttribute(*instr, VI_ATTR_TMO_VALUE, timeout);
+    err = pviSetAttribute(*instr, VI_ATTR_TMO_VALUE, timeout);
     if (err) {
-        viStatusDesc(dfm, err, desc);
-        viClose(dfm);
-        viClose(*instr);
+        pviStatusDesc(dfm, err, desc);
+        pviClose(dfm);
+        pviClose(*instr);
         lua_pushstring(L, desc);
         lua_error(L);
     }
@@ -73,7 +136,7 @@ static int vclose(lua_State *L)
 {
     ViSession instr = *tovsession(L);
     if (instr) {
-	viClose(instr);
+	pviClose(instr);
 	*tovsession(L) = 0;
     }
     return 0;
@@ -87,10 +150,10 @@ static int vread(lua_State *L)
     luaL_buffinit(L, &b);
     for (;;) {
         char *p = luaL_prepbuffer(&b);
-        ViStatus err = viRead(instr, (ViPBuf)p, LUAL_BUFFERSIZE, &nr);
+        ViStatus err = pviRead(instr, (ViPBuf)p, LUAL_BUFFERSIZE, &nr);
         if (err && err != VI_SUCCESS_MAX_CNT) {
             ViChar desc[1024];
-            viStatusDesc(instr, err, desc);
+            pviStatusDesc(instr, err, desc);
             lua_pushstring(L, desc);
             lua_error(L);
         }
@@ -114,10 +177,10 @@ static int vwrite(lua_State *L)
     lua_pushvalue(L, 1);
 
     for(;;) {
-        err = viWrite(instr, (ViBuf)data, size, &ret);
+        err = pviWrite(instr, (ViBuf)data, size, &ret);
         if (err) {
             ViChar desc[1024];
-            viStatusDesc(instr, err, desc);
+            pviStatusDesc(instr, err, desc);
             lua_pushstring(L, desc);
             lua_error(L);
         }
@@ -136,7 +199,7 @@ static int vtostring(lua_State *L)
 {
     ViChar rsrc[256];
     ViSession instr = *tovsession(L);
-    viGetAttribute(instr, VI_ATTR_RSRC_NAME,rsrc);
+    pviGetAttribute(instr, VI_ATTR_RSRC_NAME,rsrc);
     lua_pushfstring(L, "Session: %p, Resource: %s", instr, rsrc);
     return 1;
 }
@@ -166,6 +229,7 @@ static void create_vsession_meta(lua_State *L)
 
 LUALIB_API int luaopen_lvisa (lua_State *L)
 {
+	load_visa(L);
     luaL_newlib(L, lvisa);
     create_vsession_meta(L);
     return 1;
