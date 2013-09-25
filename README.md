@@ -1,7 +1,7 @@
 lua-instrument
 ==============
 
-lua-instrument is a lua module for instrument operating through VISA interface.
+lua-instrument is a lua module for instrument controlling through VISA interface.
 
 ## To build:
 
@@ -38,6 +38,9 @@ if s ~= 0 then
   print("bad status: "..m)
 end
 ```
+
+## Downloads
+[Demo for win32](http://liwenhao.github.io/lua-instrument/downloads/demo.zip)
 
 ## TODO:
 
