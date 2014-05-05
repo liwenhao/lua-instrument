@@ -24,7 +24,7 @@ Run `build/vc2008/build.bat` or open `build/vc2008/lvisa.sln`
 ## To Run:
 
 Make sure `lvisa.dll` and `instrument.lua` in lua's package search path.
-Try same simple code:
+Try some simple code:
 
 ```lua
 require("instrument")
